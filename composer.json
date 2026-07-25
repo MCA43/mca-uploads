@@ -1,0 +1,60 @@
+{
+    "name": "mca/uploads",
+    "description": "Secure file upload manager with disk policies, replace/delete lifecycle and branding image widgets for Laravel.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "mca", "upload", "uploads", "storage", "image"],
+    "require": {
+        "php": "^8.3",
+        "laravel/framework": "^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^11.0",
+        "phpunit/phpunit": "^12.0"
+    },
+    "suggest": {
+        "intervention/image": "Optional image processing (WebP, resize, thumbnails)",
+        "mca/settings": "Use image_upload widget for branding fields",
+        "mca/hub": "MCA package hub integration"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mca\\Upload\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mca\\Upload\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Mca\\Upload\\UploadServiceProvider"
+            ]
+        },
+        "mca": {
+            "slug": "uploads",
+            "title": {
+                "en": "Uploads",
+                "tr": "Yüklemeler"
+            },
+            "description": {
+                "en": "Secure uploads, disk policies and branding image widgets.",
+                "tr": "Güvenli yükleme, disk politikaları ve marka görsel widget'ları."
+            },
+            "github": "https://github.com/MCA43/mca-uploads",
+            "icon": "upload",
+            "order": 25,
+            "frameworks": ["laravel13"]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
