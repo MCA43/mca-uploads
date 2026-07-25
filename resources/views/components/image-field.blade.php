@@ -122,7 +122,7 @@
             x-show="preview"
             x-cloak
             x-bind:src="preview || ''"
-            @error="onImgError()"
+            x-on:error="onImgError()"
             alt=""
             draggable="false"
         >

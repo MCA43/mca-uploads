@@ -1,11 +1,16 @@
 # Changelog
 
+## 0.1.4 — 2026-07-26
+
+### Fixed
+- Alpine image `error` handler uses `x-on:error` so Blade no longer treats it as the `@error` validation directive (ParseError)
+
 ## 0.1.3 — 2026-07-26
 
 ### Fixed
 - Preview URLs for `web` / public-root disks are now root-relative (`/uploads/...`) so http↔https host mismatches no longer break `<img>` previews
 - Accept hint text (`PNG · JPG · WEBP`) no longer shows broken `/PNG` fragments
-- Image tile uses `x-bind:src` + `@error` instead of brittle `x-if` template
+- Image tile uses `x-bind:src` + error handler instead of brittle `x-if` template
 
 ## 0.1.2 — 2026-07-26
 
