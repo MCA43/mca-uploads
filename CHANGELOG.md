@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 — 2026-07-26
+
+### Changed
+- `image-field`: optional `id`, `preserve`, `currentName` props (settings can own the path hidden field)
+- `UploadManager::delete` only removes keys under `uploads/` (static brand assets are never deleted)
+
 ## 0.1.0 — 2026-07-25
 
 ### Added

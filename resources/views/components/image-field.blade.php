@@ -1,15 +1,19 @@
 @props([
     'name',
+    'id' => null,
     'label' => null,
     'value' => null,
     'preset' => null,
     'accept' => 'image/png,image/jpeg,image/webp,image/gif,image/x-icon,.ico',
     'help' => null,
+    'preserve' => true,
+    'currentName' => null,
 ])
 
 @php
     $currentUrl = mca_upload_url(is_string($value) ? $value : null);
-    $inputId = 'mca-upload-'.md5($name);
+    $inputId = $id ?: 'mca-upload-'.md5($name);
+    $currentField = $currentName ?? ($name.'_current');
 @endphp
 
 <div
@@ -49,8 +53,8 @@
             @if ($preset) data-mca-upload-preset="{{ $preset }}" @endif
         >
 
-        @if (is_string($value) && $value !== '')
-            <input type="hidden" name="{{ $name }}_current" value="{{ $value }}">
+        @if ($preserve && is_string($value) && $value !== '')
+            <input type="hidden" name="{{ $currentField }}" value="{{ $value }}">
         @endif
     </div>
 </div>

@@ -80,7 +80,8 @@ final class UploadManager
             return;
         }
 
-        if (str_starts_with($path, 'brand/')) {
+        // Only remove managed upload keys; never touch static brand assets.
+        if (str_starts_with($path, 'brand/') || ! str_starts_with(ltrim($path, '/'), 'uploads/')) {
             return;
         }
 

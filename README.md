@@ -15,8 +15,23 @@ Laravel 13 için güvenli dosya yükleme çekirdeği: disk politikaları, MIME d
 
 ## Kurulum
 
+### Uygulama (VCS / Packagist)
+
 ```bash
 composer require mca/uploads
+php artisan mca:upload:install
+```
+
+### MCA Starter (path / monorepo)
+
+```text
+mca-starter/packages/mca/uploads
+```
+
+`composer.json` içinde path repository + `"mca/uploads": "@dev"` ile symlink kurulur:
+
+```bash
+composer update mca/uploads
 php artisan mca:upload:install
 ```
 
