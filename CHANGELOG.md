@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.0 — 2026-07-26
+
+### Added
+- Cloud Box HTTP driver: `HttpCloudBoxClient`, `CloudBoxObjectStore`, `CloudBoxException`
+- `UploadManager::storeFor()` returns Cloud Box store when `upload.cloudbox.enabled` is true
+- Stored remote paths use opaque keys: `cloudbox:{uuid}`
+- Config: `api_prefix`, `timeout`, `folder_id`, `visibility`, `signed_url_minutes`
+- Unit tests with `Http::fake` for upload / url / delete / signed URL
+
+### Changed
+- `mca:upload:install` skips local directory creation when Cloud Box is enabled
+- README Cloud Box section documents env vars and path format
+
 ## 0.1.4 — 2026-07-26
 
 ### Fixed

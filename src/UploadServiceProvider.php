@@ -4,6 +4,9 @@ namespace Mca\Upload;
 
 use Illuminate\Support\ServiceProvider;
 use Mca\Upload\Console\InstallUploadCommand;
+use Mca\Upload\Contracts\CloudBoxClient;
+use Mca\Upload\Services\CloudBoxObjectStore;
+use Mca\Upload\Services\HttpCloudBoxClient;
 use Mca\Upload\Services\UploadManager;
 use Mca\Upload\Support\FileNamer;
 use Mca\Upload\Support\FileValidator;
@@ -17,6 +20,11 @@ class UploadServiceProvider extends ServiceProvider
         $this->app->singleton(FileValidator::class);
         $this->app->singleton(FileNamer::class);
         $this->app->singleton(UploadManager::class);
+
+        $this->app->singleton(CloudBoxClient::class, fn () => HttpCloudBoxClient::fromConfig());
+        $this->app->singleton(CloudBoxObjectStore::class, fn ($app) => new CloudBoxObjectStore(
+            $app->make(CloudBoxClient::class),
+        ));
     }
 
     public function boot(): void

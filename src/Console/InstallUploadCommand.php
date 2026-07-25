@@ -25,6 +25,13 @@ class InstallUploadCommand extends Command
             '--force' => true,
         ]);
 
+        if ((bool) config('upload.cloudbox.enabled', false)) {
+            $this->components->info('Cloud Box driver etkin — yerel upload dizini atlandı.');
+            $this->line('  MCA_UPLOAD_CLOUDBOX_URL / MCA_UPLOAD_CLOUDBOX_TOKEN ayarlarını doğrulayın.');
+
+            return self::SUCCESS;
+        }
+
         $presets = (array) config('upload.presets', []);
         $directory = (string) (($presets['branding.light_logo']['directory'] ?? null) ?: 'uploads/branding');
         $disk = (string) config('upload.disk', 'web');

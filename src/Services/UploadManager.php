@@ -38,10 +38,17 @@ final class UploadManager
         }
 
         try {
-            $store->putStream($key, $stream);
+            $store->putStream($key, $stream, ['filename' => $filename]);
         } finally {
             if (is_resource($stream)) {
                 fclose($stream);
+            }
+        }
+
+        if ($store instanceof CloudBoxObjectStore) {
+            $remoteKey = $store->consumeLastStoredKey();
+            if (is_string($remoteKey) && $remoteKey !== '') {
+                $key = $remoteKey;
             }
         }
 
@@ -53,7 +60,7 @@ final class UploadManager
 
         return new StoredFile(
             path: $key,
-            disk: $options->disk,
+            disk: $store->diskName(),
             originalName: $file->getClientOriginalName(),
             mimeType: $mime,
             size: (int) $file->getSize(),
@@ -80,6 +87,12 @@ final class UploadManager
             return;
         }
 
+        if (CloudBoxObjectStore::isCloudBoxKey($path)) {
+            $this->cloudBoxStore()->delete($path);
+
+            return;
+        }
+
         // Only remove managed upload keys; never touch static brand assets.
         if (str_starts_with($path, 'brand/') || ! str_starts_with(ltrim($path, '/'), 'uploads/')) {
             return;
@@ -97,6 +110,10 @@ final class UploadManager
 
         if (preg_match('#^https?://#i', $path) === 1) {
             return $path;
+        }
+
+        if (CloudBoxObjectStore::isCloudBoxKey($path)) {
+            return $this->cloudBoxStore()->url($path);
         }
 
         $diskName = $this->resolveDisk($disk);
@@ -120,12 +137,30 @@ final class UploadManager
 
     public function storeFor(string $disk): ObjectStore
     {
+        if ($this->cloudBoxEnabled()) {
+            return $this->cloudBoxStore();
+        }
+
         return new LaravelFilesystemObjectStore($disk);
+    }
+
+    public function cloudBoxEnabled(): bool
+    {
+        return (bool) config('upload.cloudbox.enabled', false);
+    }
+
+    private function cloudBoxStore(): CloudBoxObjectStore
+    {
+        return app(CloudBoxObjectStore::class);
     }
 
     private function resolveDisk(?string $disk): string
     {
         $diskName = $disk ?: (string) config('upload.disk', 'web');
+
+        if ($diskName === 'cloudbox') {
+            return 'cloudbox';
+        }
 
         if (! array_key_exists($diskName, config('filesystems.disks', []))) {
             return (string) config('upload.fallback_disk', 'public');
@@ -136,6 +171,10 @@ final class UploadManager
 
     private function ensureDirectory(UploadOptions $options): void
     {
+        if ($this->cloudBoxEnabled()) {
+            return;
+        }
+
         $fs = Storage::disk($options->disk);
         $fs->makeDirectory($options->directory);
 

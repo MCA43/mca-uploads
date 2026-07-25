@@ -95,13 +95,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Cloud Box HTTP driver (optional, phase 2)
+    | Cloud Box HTTP driver (optional)
     |--------------------------------------------------------------------------
+    |
+    | When enabled, UploadManager::storeFor() uses Cloud Box instead of local
+    | disks. Stored paths look like cloudbox:{uuid}.
+    |
     */
     'cloudbox' => [
         'enabled' => (bool) env('MCA_UPLOAD_CLOUDBOX_ENABLED', false),
         'base_url' => env('MCA_UPLOAD_CLOUDBOX_URL'),
         'token' => env('MCA_UPLOAD_CLOUDBOX_TOKEN'),
+        'api_prefix' => env('MCA_UPLOAD_CLOUDBOX_API_PREFIX', 'api/v1'),
+        'timeout' => (int) env('MCA_UPLOAD_CLOUDBOX_TIMEOUT', 30),
+        'folder_id' => env('MCA_UPLOAD_CLOUDBOX_FOLDER_ID'),
+        'visibility' => env('MCA_UPLOAD_CLOUDBOX_VISIBILITY', 'public'), // public|private
+        'signed_url_minutes' => (int) env('MCA_UPLOAD_CLOUDBOX_SIGNED_MINUTES', 60),
     ],
 
 ];
