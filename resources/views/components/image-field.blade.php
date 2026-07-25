@@ -16,7 +16,27 @@
     $inputId = $id ?: 'mca-upload-'.md5($name);
     $currentField = $currentName ?? ($name.'_current');
     $acceptHint = collect(explode(',', (string) $accept))
-        ->map(fn ($part) => strtoupper(ltrim(strrchr(trim($part), '/') ?: trim($part), '.')))
+        ->map(function (string $part) {
+            $part = trim($part);
+            if ($part === '') {
+                return null;
+            }
+            if (str_starts_with($part, '.')) {
+                return strtoupper(ltrim($part, '.'));
+            }
+            if (str_contains($part, '/')) {
+                $subtype = strtolower((string) substr($part, strrpos($part, '/') + 1));
+
+                return match ($subtype) {
+                    'jpeg' => 'JPG',
+                    'svg+xml' => 'SVG',
+                    'x-icon', 'vnd.microsoft.icon' => 'ICO',
+                    default => strtoupper($subtype),
+                };
+            }
+
+            return strtoupper($part);
+        })
         ->filter()
         ->unique()
         ->take(4)
@@ -46,11 +66,17 @@
         onDrop(event) {
             this.dragging = false;
             const file = event.dataTransfer?.files?.[0];
-            if (!file) return;
+            if (!file || !file.type.startsWith('image/')) return;
             const dt = new DataTransfer();
             dt.items.add(file);
             this.$refs.input.files = dt.files;
             this.preview = URL.createObjectURL(file);
+        },
+        onImgError() {
+            // Mutlak URL / host uyuşmazlığında kırık ikon yerine boş duruma dön.
+            if (this.preview && !String(this.preview).startsWith('blob:')) {
+                this.preview = null;
+            }
         }
     }"
 >
@@ -65,7 +91,7 @@
     <div
         class="mca-upload-tile mca-upload-tile--{{ $aspect }}"
         :class="{
-            'mca-upload-tile--filled': preview,
+            'mca-upload-tile--filled': !!preview,
             'mca-upload-tile--dragging': dragging
         }"
         role="button"
@@ -91,9 +117,15 @@
             @if ($preset) data-mca-upload-preset="{{ $preset }}" @endif
         >
 
-        <template x-if="preview">
-            <img class="mca-upload-tile__preview" :src="preview" alt="">
-        </template>
+        <img
+            class="mca-upload-tile__preview"
+            x-show="preview"
+            x-cloak
+            x-bind:src="preview || ''"
+            @error="onImgError()"
+            alt=""
+            draggable="false"
+        >
 
         <div class="mca-upload-tile__empty" x-show="!preview" x-cloak>
             <span class="mca-upload-tile__icon" aria-hidden="true">

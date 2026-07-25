@@ -82,6 +82,11 @@
         radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--mca-ui-border, #cbd5e1) 55%, transparent) 1px, transparent 0) 0 0 / 12px 12px;
 }
 
+.mca-upload-tile__preview[src=""],
+.mca-upload-tile__preview:not([src]) {
+    display: none;
+}
+
 .mca-upload-tile__empty {
     display: flex;
     flex-direction: column;

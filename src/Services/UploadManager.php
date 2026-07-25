@@ -100,8 +100,22 @@ final class UploadManager
         }
 
         $diskName = $this->resolveDisk($disk);
+        $root = config("filesystems.disks.{$diskName}.root");
 
-        return $this->storeFor($diskName)->url($path) ?? asset(ltrim($path, '/'));
+        // public/ tabanlı disklerde kök-göreli URL kullan (http/https ve host farkında kırılmaz).
+        if ($diskName === 'web') {
+            return '/'.ltrim(str_replace('\\', '/', $path), '/');
+        }
+
+        if (is_string($root)) {
+            $normalizedRoot = rtrim(str_replace('\\', '/', $root), '/');
+            $normalizedPublic = rtrim(str_replace('\\', '/', public_path()), '/');
+            if (strcasecmp($normalizedRoot, $normalizedPublic) === 0) {
+                return '/'.ltrim(str_replace('\\', '/', $path), '/');
+            }
+        }
+
+        return $this->storeFor($diskName)->url($path) ?? '/'.ltrim(str_replace('\\', '/', $path), '/');
     }
 
     public function storeFor(string $disk): ObjectStore
