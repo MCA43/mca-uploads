@@ -1,0 +1,194 @@
+/* mca/uploads — image tile field */
+
+.mca-upload-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.mca-upload-field__label {
+    margin-bottom: 0;
+}
+
+.mca-upload-tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 14rem;
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+    border: 1.5px dashed color-mix(in srgb, var(--mca-ui-border, #cbd5e1) 85%, transparent);
+    border-radius: 0.85rem;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--mca-ui-surface, #fff) 92%, #f8fafc), var(--mca-ui-surface, #fff));
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease,
+        transform 0.18s ease;
+}
+
+.mca-upload-tile--square {
+    aspect-ratio: 1 / 1;
+}
+
+.mca-upload-tile--wide {
+    aspect-ratio: 16 / 10;
+    max-width: 18rem;
+}
+
+.mca-upload-tile:hover,
+.mca-upload-tile:focus-visible {
+    border-color: color-mix(in srgb, var(--mca-ui-primary, #f97316) 55%, var(--mca-ui-border, #cbd5e1));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--mca-ui-primary, #f97316) 16%, transparent);
+    outline: none;
+}
+
+.mca-upload-tile--dragging {
+    border-style: solid;
+    border-color: var(--mca-ui-primary, #f97316);
+    background: color-mix(in srgb, var(--mca-ui-primary, #f97316) 8%, var(--mca-ui-surface, #fff));
+}
+
+.mca-upload-tile--filled {
+    border-style: solid;
+    border-color: color-mix(in srgb, var(--mca-ui-border, #e2e8f0) 90%, transparent);
+    background: #fff;
+}
+
+.mca-upload-tile__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.mca-upload-tile__preview {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 0.85rem;
+    background:
+        radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--mca-ui-border, #cbd5e1) 55%, transparent) 1px, transparent 0) 0 0 / 12px 12px;
+}
+
+.mca-upload-tile__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 1rem;
+    text-align: center;
+    color: var(--mca-ui-muted, #64748b);
+}
+
+.mca-upload-tile__icon {
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    margin-bottom: 0.15rem;
+    color: var(--mca-ui-primary, #f97316);
+    background: color-mix(in srgb, var(--mca-ui-primary, #f97316) 12%, transparent);
+    border-radius: 0.7rem;
+}
+
+.mca-upload-tile__icon svg {
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.mca-upload-tile__title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--mca-ui-text, #0f172a);
+}
+
+.mca-upload-tile__hint {
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+    color: var(--mca-ui-muted, #94a3b8);
+}
+
+.mca-upload-tile__overlay {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0.65rem;
+    background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.45) 100%);
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    pointer-events: none;
+}
+
+.mca-upload-tile--filled:hover .mca-upload-tile__overlay,
+.mca-upload-tile--filled:focus-visible .mca-upload-tile__overlay {
+    opacity: 1;
+}
+
+.mca-upload-tile__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #0f172a;
+    font-size: 0.75rem;
+    font-weight: 600;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+}
+
+.mca-upload-tile__chip svg {
+    width: 0.85rem;
+    height: 0.85rem;
+}
+
+/* Settings form: image tiles in a responsive row */
+.mca-sett-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
+    gap: 1.15rem 1rem;
+}
+
+.mca-sett-field--wide {
+    grid-column: 1 / -1;
+}
+
+.mca-sett-field--upload {
+    grid-column: span 1;
+}
+
+[data-theme="dark"] .mca-upload-tile,
+.hc-theme-scope[data-theme="dark"] .mca-upload-tile {
+    background: color-mix(in srgb, var(--hc-surface, #111827) 88%, #0f172a);
+}
+
+[data-theme="dark"] .mca-upload-tile--filled,
+.hc-theme-scope[data-theme="dark"] .mca-upload-tile--filled {
+    background: #0b1220;
+}
+
+[data-theme="dark"] .mca-upload-tile__title,
+.hc-theme-scope[data-theme="dark"] .mca-upload-tile__title {
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .mca-upload-tile__chip,
+.hc-theme-scope[data-theme="dark"] .mca-upload-tile__chip {
+    background: rgba(15, 23, 42, 0.92);
+    color: #f8fafc;
+}

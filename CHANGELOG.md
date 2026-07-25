@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2 — 2026-07-26
+
+### Fixed
+- Dotted preset keys (`branding.favicon`) now resolve correctly (no longer fall back to `uploads/mca`)
+
+### Changed
+- Modern dashed tile UI for `image-field` (preview, hover “Değiştir” chip, drag-and-drop)
+- Publishes / auto-copies `vendor/mca-upload/mca-upload.css`
+
 ## 0.1.1 — 2026-07-26
 
 ### Changed

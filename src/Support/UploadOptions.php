@@ -34,7 +34,9 @@ final class UploadOptions
         ];
 
         if (is_string($preset) && $preset !== '') {
-            $presetConfig = (array) config('upload.presets.'.$preset, []);
+            $presets = (array) config('upload.presets', []);
+            // Dotted preset keys (e.g. branding.favicon) must not use config('a.b.c') nesting.
+            $presetConfig = is_array($presets[$preset] ?? null) ? $presets[$preset] : [];
             $base = array_replace($base, $presetConfig);
             $base['prefix'] = (string) ($presetConfig['prefix'] ?? str_replace('.', '-', $preset));
         }

@@ -29,4 +29,29 @@ class FileNamerTest extends TestCase
         $this->assertStringStartsWith('dark-logo-', $name);
         $this->assertStringEndsWith('.png', $name);
     }
+
+    public function test_dotted_preset_keys_resolve_directory_and_prefix(): void
+    {
+        config([
+            'upload.disk' => 'public',
+            'upload.directory' => 'uploads/mca',
+            'upload.presets' => [
+                'branding.favicon' => [
+                    'directory' => 'uploads/branding',
+                    'prefix' => 'favicon',
+                    'max_kb' => 1024,
+                ],
+            ],
+            'filesystems.disks.public' => [
+                'driver' => 'local',
+                'root' => storage_path('app/public'),
+            ],
+        ]);
+
+        $options = UploadOptions::fromConfig('branding.favicon');
+
+        $this->assertSame('uploads/branding', $options->directory);
+        $this->assertSame('favicon', $options->prefix);
+        $this->assertSame(1024, $options->maxKb);
+    }
 }

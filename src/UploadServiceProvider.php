@@ -26,6 +26,7 @@ class UploadServiceProvider extends ServiceProvider
         }
 
         $this->registerPublishing();
+        $this->ensurePublicAssets();
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'mca-upload');
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'mca-upload');
         $this->registerHub();
@@ -46,6 +47,30 @@ class UploadServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../resources/views' => resource_path('views/vendor/mca-upload'),
         ], 'mca-upload-views');
+
+        $this->publishes([
+            __DIR__.'/../resources/assets/mca-upload.css' => public_path('vendor/mca-upload/mca-upload.css'),
+        ], 'mca-upload-assets');
+    }
+
+    protected function ensurePublicAssets(): void
+    {
+        $target = public_path('vendor/mca-upload/mca-upload.css');
+        $source = __DIR__.'/../resources/assets/mca-upload.css';
+
+        if (! is_file($source)) {
+            return;
+        }
+
+        if (is_file($target) && filemtime($target) >= filemtime($source)) {
+            return;
+        }
+
+        if (! is_dir(dirname($target))) {
+            mkdir(dirname($target), 0755, true);
+        }
+
+        copy($source, $target);
     }
 
     protected function registerHub(): void

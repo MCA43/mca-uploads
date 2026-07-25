@@ -20,7 +20,13 @@ class InstallUploadCommand extends Command
             '--force' => (bool) $this->option('force'),
         ]);
 
-        $directory = (string) config('upload.presets.branding.light_logo.directory', 'uploads/branding');
+        $this->call('vendor:publish', [
+            '--tag' => 'mca-upload-assets',
+            '--force' => true,
+        ]);
+
+        $presets = (array) config('upload.presets', []);
+        $directory = (string) (($presets['branding.light_logo']['directory'] ?? null) ?: 'uploads/branding');
         $disk = (string) config('upload.disk', 'web');
 
         if (! array_key_exists($disk, config('filesystems.disks', []))) {
