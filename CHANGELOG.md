@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — 2026-07-26
+
+### Changed
+- Cloud Box HTTP driver moved to separate package `mca/uploads-cloudbox`
+- `UploadManager` uses optional `ObjectStoreDriver` binding (no hard Cloud Box dependency)
+- Removed `upload.cloudbox` config from this package (lives in uploads-cloudbox)
+
+### Added
+- `ObjectStoreDriver` contract for pluggable remote stores
+
 ## 0.2.0 — 2026-07-26
 
 ### Added

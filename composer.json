@@ -15,7 +15,8 @@
     "suggest": {
         "intervention/image": "Optional image processing (WebP, resize, thumbnails)",
         "mca/settings": "Use image_upload widget for branding fields",
-        "mca/hub": "MCA package hub integration"
+        "mca/hub": "MCA package hub integration",
+        "mca/uploads-cloudbox": "Optional MCA Cloud Box HTTP ObjectStore driver"
     },
     "autoload": {
         "psr-4": {

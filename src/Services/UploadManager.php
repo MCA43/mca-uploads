@@ -5,6 +5,7 @@ namespace Mca\Upload\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Mca\Upload\Contracts\ObjectStore;
+use Mca\Upload\Contracts\ObjectStoreDriver;
 use Mca\Upload\Support\FileNamer;
 use Mca\Upload\Support\FileValidator;
 use Mca\Upload\Support\StoredFile;
@@ -45,7 +46,7 @@ final class UploadManager
             }
         }
 
-        if ($store instanceof CloudBoxObjectStore) {
+        if (method_exists($store, 'consumeLastStoredKey')) {
             $remoteKey = $store->consumeLastStoredKey();
             if (is_string($remoteKey) && $remoteKey !== '') {
                 $key = $remoteKey;
@@ -87,8 +88,9 @@ final class UploadManager
             return;
         }
 
-        if (CloudBoxObjectStore::isCloudBoxKey($path)) {
-            $this->cloudBoxStore()->delete($path);
+        $driver = $this->activeDriver();
+        if ($driver !== null && $driver->managesKey($path)) {
+            $driver->store()->delete($path);
 
             return;
         }
@@ -112,8 +114,9 @@ final class UploadManager
             return $path;
         }
 
-        if (CloudBoxObjectStore::isCloudBoxKey($path)) {
-            return $this->cloudBoxStore()->url($path);
+        $driver = $this->activeDriver();
+        if ($driver !== null && $driver->managesKey($path)) {
+            return $driver->store()->url($path);
         }
 
         $diskName = $this->resolveDisk($disk);
@@ -137,21 +140,29 @@ final class UploadManager
 
     public function storeFor(string $disk): ObjectStore
     {
-        if ($this->cloudBoxEnabled()) {
-            return $this->cloudBoxStore();
+        $driver = $this->activeDriver();
+        if ($driver !== null) {
+            return $driver->store();
         }
 
         return new LaravelFilesystemObjectStore($disk);
     }
 
-    public function cloudBoxEnabled(): bool
+    public function driverEnabled(): bool
     {
-        return (bool) config('upload.cloudbox.enabled', false);
+        return $this->activeDriver() !== null;
     }
 
-    private function cloudBoxStore(): CloudBoxObjectStore
+    private function activeDriver(): ?ObjectStoreDriver
     {
-        return app(CloudBoxObjectStore::class);
+        if (! app()->bound(ObjectStoreDriver::class)) {
+            return null;
+        }
+
+        /** @var ObjectStoreDriver $driver */
+        $driver = app(ObjectStoreDriver::class);
+
+        return $driver->enabled() ? $driver : null;
     }
 
     private function resolveDisk(?string $disk): string
@@ -171,7 +182,7 @@ final class UploadManager
 
     private function ensureDirectory(UploadOptions $options): void
     {
-        if ($this->cloudBoxEnabled()) {
+        if ($this->activeDriver() !== null) {
             return;
         }
 

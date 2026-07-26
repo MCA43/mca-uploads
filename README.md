@@ -79,24 +79,13 @@ Form `enctype="multipart/form-data"` olmalıdır.
 
 ## Cloud Box
 
-Opsiyonel uzak depolama: [MCA Cloud Box](https://github.com/MCA43) `api/v1` dosya uç noktaları.
+Cloud Box HTTP sürücüsü ayrı pakettedir: **`mca/uploads-cloudbox`**.
 
-```env
-MCA_UPLOAD_CLOUDBOX_ENABLED=true
-MCA_UPLOAD_CLOUDBOX_URL=https://cloudbox.example.com
-MCA_UPLOAD_CLOUDBOX_TOKEN=sanctum-personal-access-token
-# MCA_UPLOAD_CLOUDBOX_VISIBILITY=public
-# MCA_UPLOAD_CLOUDBOX_FOLDER_ID=
-# MCA_UPLOAD_CLOUDBOX_SIGNED_MINUTES=60
+```bash
+composer require mca/uploads-cloudbox
 ```
 
-Etkinleştirildiğinde `UploadManager` yerel disk yerine Cloud Box’a yazar. Kayıtlı path biçimi:
-
-```text
-cloudbox:{uuid}
-```
-
-`mca_upload_url('cloudbox:…')` public URL (veya private ise imzalı URL) döner. Kota / çöp kutusu / klasör UI Cloud Box uygulamasında kalır; bu paket yalnızca ObjectStore HTTP sürücüsüdür.
+Bu çekirdek paket yalnızca yerel `ObjectStore` + `ObjectStoreDriver` kancası sağlar.
 
 ## Publish
 
@@ -126,4 +115,4 @@ php artisan mca:upload:install
 $stored = mca_upload()->store($request->file('logo'), 'branding.dark_logo');
 ```
 
-Cloud Box HTTP driver (optional): set `MCA_UPLOAD_CLOUDBOX_*` env vars; stored paths are `cloudbox:{uuid}`.
+Cloud Box HTTP driver lives in the separate `mca/uploads-cloudbox` package.

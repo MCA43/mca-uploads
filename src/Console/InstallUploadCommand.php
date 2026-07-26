@@ -25,11 +25,14 @@ class InstallUploadCommand extends Command
             '--force' => true,
         ]);
 
-        if ((bool) config('upload.cloudbox.enabled', false)) {
-            $this->components->info('Cloud Box driver etkin — yerel upload dizini atlandı.');
-            $this->line('  MCA_UPLOAD_CLOUDBOX_URL / MCA_UPLOAD_CLOUDBOX_TOKEN ayarlarını doğrulayın.');
+        if (app()->bound(\Mca\Upload\Contracts\ObjectStoreDriver::class)) {
+            /** @var \Mca\Upload\Contracts\ObjectStoreDriver $driver */
+            $driver = app(\Mca\Upload\Contracts\ObjectStoreDriver::class);
+            if ($driver->enabled()) {
+                $this->components->info('Uzak ObjectStore driver etkin — yerel upload dizini atlandı.');
 
-            return self::SUCCESS;
+                return self::SUCCESS;
+            }
         }
 
         $presets = (array) config('upload.presets', []);
