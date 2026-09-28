@@ -18,10 +18,15 @@ final class UploadOptions
         public readonly string $nameStrategy = 'ulid',
         public readonly bool $allowSvg = false,
         public readonly ?string $preset = null,
+        public readonly ?string $convert = null,
+        public readonly int $quality = 80,
+        public readonly ?int $maxEdge = null,
     ) {}
 
     public static function fromConfig(?string $preset = null, array $overrides = []): self
     {
+        $imageDefaults = (array) config('upload.image', []);
+
         $base = [
             'disk' => (string) config('upload.disk', 'web'),
             'directory' => (string) config('upload.directory', 'uploads/mca'),
@@ -31,6 +36,11 @@ final class UploadOptions
             'prefix' => 'file',
             'name_strategy' => (string) config('upload.name_strategy', 'ulid'),
             'allow_svg' => (bool) config('upload.allow_svg', false),
+            'convert' => $imageDefaults['convert'] ?? null,
+            'quality' => (int) ($imageDefaults['quality'] ?? 80),
+            'max_edge' => array_key_exists('max_edge', $imageDefaults)
+                ? ($imageDefaults['max_edge'] !== null ? (int) $imageDefaults['max_edge'] : null)
+                : 1920,
         ];
 
         if (is_string($preset) && $preset !== '') {
@@ -48,6 +58,19 @@ final class UploadOptions
             $disk = (string) config('upload.fallback_disk', 'public');
         }
 
+        $convert = $merged['convert'] ?? null;
+        $convert = is_string($convert) && $convert !== '' ? strtolower($convert) : null;
+        if ($convert !== 'webp') {
+            $convert = null;
+        }
+
+        $maxEdge = $merged['max_edge'] ?? null;
+        if ($maxEdge === false || $maxEdge === '' || $maxEdge === null) {
+            $maxEdge = null;
+        } else {
+            $maxEdge = max(1, (int) $maxEdge);
+        }
+
         return new self(
             disk: $disk,
             directory: trim((string) $merged['directory'], '/'),
@@ -58,6 +81,9 @@ final class UploadOptions
             nameStrategy: (string) ($merged['name_strategy'] ?? 'ulid'),
             allowSvg: (bool) ($merged['allow_svg'] ?? false),
             preset: $preset,
+            convert: $convert,
+            quality: max(1, min(100, (int) ($merged['quality'] ?? 80))),
+            maxEdge: $maxEdge,
         );
     }
 }

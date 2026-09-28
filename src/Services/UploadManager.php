@@ -8,6 +8,7 @@ use Mca\Upload\Contracts\ObjectStore;
 use Mca\Upload\Contracts\ObjectStoreDriver;
 use Mca\Upload\Support\FileNamer;
 use Mca\Upload\Support\FileValidator;
+use Mca\Upload\Support\ImageProcessor;
 use Mca\Upload\Support\StoredFile;
 use Mca\Upload\Support\UploadOptions;
 use RuntimeException;
@@ -25,50 +26,65 @@ final class UploadManager
         $options = UploadOptions::fromConfig($preset, $overrides);
         $this->validator->validate($file, $options);
 
-        $store = $this->storeFor($options->disk);
-        $mime = $this->validator->detectMime($file);
-        $extension = $this->validator->extensionForMime($mime, $file);
-        $filename = $this->namer->make($options, $extension);
-        $key = trim($options->directory.'/'.$filename, '/');
-
-        $this->ensureDirectory($options);
-
-        $stream = fopen($file->getRealPath() ?: $file->getPathname(), 'r');
-        if ($stream === false) {
-            throw new RuntimeException('Yüklenen dosya okunamadı.');
-        }
+        $processor = new ImageProcessor;
+        $processed = $processor->process($file, $options);
+        $upload = $processed['file'] ?? $file;
+        $mime = $processed['mime'] ?? $this->validator->detectMime($file);
+        $cleanup = $processed['cleanup'] ?? null;
 
         try {
-            $store->putStream($key, $stream, ['filename' => $filename]);
+            $store = $this->storeFor($options->disk);
+            $extension = $this->validator->extensionForMime($mime, $upload);
+            $filename = $this->namer->make($options, $extension);
+            $key = trim($options->directory.'/'.$filename, '/');
+
+            $this->ensureDirectory($options);
+
+            $stream = fopen($upload->getRealPath() ?: $upload->getPathname(), 'r');
+            if ($stream === false) {
+                throw new RuntimeException('Yüklenen dosya okunamadı.');
+            }
+
+            try {
+                $store->putStream($key, $stream, ['filename' => $filename]);
+            } finally {
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+            }
+
+            if (method_exists($store, 'consumeLastStoredKey')) {
+                $remoteKey = $store->consumeLastStoredKey();
+                if (is_string($remoteKey) && $remoteKey !== '') {
+                    $key = $remoteKey;
+                }
+            }
+
+            if (! $store->exists($key)) {
+                throw new RuntimeException('Dosya kaydedilemedi.');
+            }
+
+            $width = $processed['width'] ?? null;
+            $height = $processed['height'] ?? null;
+            if ($width === null || $height === null) {
+                [$width, $height] = $this->imageDimensions($upload, $mime);
+            }
+
+            return new StoredFile(
+                path: $key,
+                disk: $store->diskName(),
+                originalName: $file->getClientOriginalName(),
+                mimeType: $mime,
+                size: (int) filesize($upload->getRealPath() ?: $upload->getPathname()) ?: $upload->getSize(),
+                url: $store->url($key),
+                width: $width,
+                height: $height,
+            );
         } finally {
-            if (is_resource($stream)) {
-                fclose($stream);
+            if (is_string($cleanup) && is_file($cleanup)) {
+                @unlink($cleanup);
             }
         }
-
-        if (method_exists($store, 'consumeLastStoredKey')) {
-            $remoteKey = $store->consumeLastStoredKey();
-            if (is_string($remoteKey) && $remoteKey !== '') {
-                $key = $remoteKey;
-            }
-        }
-
-        if (! $store->exists($key)) {
-            throw new RuntimeException('Dosya kaydedilemedi.');
-        }
-
-        [$width, $height] = $this->imageDimensions($file, $mime);
-
-        return new StoredFile(
-            path: $key,
-            disk: $store->diskName(),
-            originalName: $file->getClientOriginalName(),
-            mimeType: $mime,
-            size: (int) $file->getSize(),
-            url: $store->url($key),
-            width: $width,
-            height: $height,
-        );
     }
 
     public function replace(UploadedFile $file, ?string $oldPath, ?string $preset = null, array $overrides = []): StoredFile

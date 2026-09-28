@@ -55,6 +55,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Image processing (optional, GD)
+    |--------------------------------------------------------------------------
+    |
+    | Preset bazında `convert => webp` ile açılır. Global varsayılan kapalıdır.
+    | quality: 1–100, max_edge: uzun kenar px (null = boyutlandırma yok).
+    |
+    */
+    'image' => [
+        'convert' => env('MCA_UPLOAD_CONVERT'), // null | webp
+        'quality' => (int) env('MCA_UPLOAD_WEBP_QUALITY', 80),
+        'max_edge' => env('MCA_UPLOAD_MAX_EDGE', 1920),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Presets (branding etc.)
     |--------------------------------------------------------------------------
     */
@@ -90,6 +105,14 @@ return [
             'directory' => 'uploads/branding',
             'max_kb' => 2048,
             'prefix' => 'dark-logo-sm',
+        ],
+        'maintenance.image' => [
+            'directory' => 'uploads/maintenance',
+            'max_kb' => 4096,
+            'prefix' => 'maintenance',
+            'convert' => 'webp',
+            'quality' => 82,
+            'max_edge' => 1920,
         ],
     ],
 
